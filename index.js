@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(cors());
 
 
-const uri = process.env.MONGODB_URI || "mongodb+srv://taskzen:erDjvNHkWRaeZFLC@cluster0.1e2dy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri = process.env.MONGODB_URI 
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -116,6 +116,29 @@ async function run() {
         res.status(500).json({ message: "Error updating task", error: error.message });
       }
     });
+
+    // Delete a task (DELETE)
+app.delete('/tasks/:id', async (req, res) => {
+  const taskId = req.params.id;
+  
+  if (!taskId) {
+    return res.status(400).json({ message: "Task ID is required" });
+  }
+
+  try {
+    const objectId = new ObjectId(taskId);
+    const result = await tasksCollection.deleteOne({ _id: objectId });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    res.status(200).json({ message: "Task deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting task", error: error.message });
+  }
+});
+
     
 
     // Send a ping to confirm a successful connection
